@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -19,6 +17,7 @@ public class SampleApi {
 
     private MongoCollection<Document> words;
     private MongoCollection<Document> ranges;
+    private MongoCollection<Document> nameCodes;
 
     @Autowired
     public SampleApi(@Value("${mongoUri}") String mongoUri) {
@@ -27,6 +26,8 @@ public class SampleApi {
         final MongoClient mongoClient = MongoClients.create(mongoUri);
         final MongoDatabase database = mongoClient.getDatabase("test");
         this.words = database.getCollection("words");
+        this.ranges = database.getCollection("ranges");
+        this.nameCodes = database.getCollection("nameCodes");
     }
 
     @GetMapping("/hello")
@@ -67,6 +68,34 @@ public class SampleApi {
 
         for (int i = 1; i <= num; i++) {
             result.add(i);
+        }
+
+        final Document document = new Document().append("range", result);
+        ranges.insertOne(document);
+        return result;
+    }
+
+    @GetMapping("/namecode")
+    public String nameCode(@RequestParam String name) {
+        String result = "";
+        char[] chars = name.toCharArray();
+        for (char letter : chars) {
+            int value = Character.getNumericValue(letter);
+            result += value;
+        }
+
+        final Document document = new Document().append("name", name).append("code", result);
+        nameCodes.insertOne(document);
+        return "Your name code is " + result;
+    }
+
+    @GetMapping("/codes")
+    public Map<String, String> listCodes() {
+
+        final Map<String, String> result = new HashMap<>();
+
+        for (Document doc : nameCodes.find()) {
+            result.put(doc.getString("name"), doc.getString("code"));
         }
 
         return result;
