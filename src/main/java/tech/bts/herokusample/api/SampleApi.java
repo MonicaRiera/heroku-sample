@@ -7,10 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,10 +18,12 @@ import java.util.List;
 public class SampleApi {
 
     private MongoCollection<Document> words;
+    private MongoCollection<Document> ranges;
 
     @Autowired
     public SampleApi(@Value("${mongoUri}") String mongoUri) {
 
+        //final MongoClient mongoClient = MongoClients.create("mongodb+srv://monica:<Mr3141592021213>@cluster0-flz04.mongodb.net/test?retryWrites=true");
         final MongoClient mongoClient = MongoClients.create(mongoUri);
         final MongoDatabase database = mongoClient.getDatabase("test");
         this.words = database.getCollection("words");
@@ -56,6 +55,18 @@ public class SampleApi {
 
         for (Document doc : words.find()) {
             result.add(doc.getString("word"));
+        }
+
+        return result;
+    }
+
+    // range?num=20
+    @GetMapping("/range")
+    public List<Integer> range(@RequestParam int num) {
+        final List<Integer> result = new ArrayList<>();
+
+        for (int i = 1; i <= num; i++) {
+            result.add(i);
         }
 
         return result;
