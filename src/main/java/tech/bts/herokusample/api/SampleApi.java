@@ -22,7 +22,6 @@ public class SampleApi {
     @Autowired
     public SampleApi(@Value("${mongoUri}") String mongoUri) {
 
-        //final MongoClient mongoClient = MongoClients.create("mongodb+srv://monica:<Mr3141592021213>@cluster0-flz04.mongodb.net/test?retryWrites=true");
         final MongoClient mongoClient = MongoClients.create(mongoUri);
         final MongoDatabase database = mongoClient.getDatabase("test");
         this.words = database.getCollection("words");
